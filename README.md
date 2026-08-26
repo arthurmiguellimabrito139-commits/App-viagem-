@@ -129,3 +129,10 @@ Corpo esperado em `POST`/`PUT`:
 
 - O CPF é usado como identificador único do passageiro (não há coluna de ID exposta nas rotas).
 - Nunca suba o arquivo `.env` para o repositório — ele contém a senha do banco.
+
+## Próximos passos
+
+- [ ] Sistema de autenticação, com dois perfis de acesso:
+  - **Admin**: pode editar e excluir os dados dos passageiros.
+  - **Passageiro**: pode apenas visualizar a própria situação (valor pago, parcelas restantes).
+- [ ] Deploy em produção (back-end, front-end e banco de dados).
