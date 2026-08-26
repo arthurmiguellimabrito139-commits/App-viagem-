@@ -1,4 +1,4 @@
-# App-loja
+# App-Viagens
 
 Sistema de gerenciamento de passageiros de uma viagem, onde o admin controla o valor pago por cada participante. Feito com **Node.js/Express + MySQL** no back-end e **React** no front-end.
 
