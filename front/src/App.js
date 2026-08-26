@@ -28,7 +28,7 @@ function App() {
 
  const getPassageiros = async () => {
   try {
-    const res = await axios.get("http://localhost:3001");
+  const res = await axios.get("http://localhost:3001/passageiros");
     setPassageiros(res.data);
   } catch (error) {
     console.log(error);
@@ -44,8 +44,8 @@ function App() {
     
     <AppContainer>
       <Title>Lista de Passageiros</Title>
-      <Form />
-      <Grid passageiros={passageiros}/>
+      <Form onEdit={onEdit} setOnEdit={setOnEdit} getPassageiros={getPassageiros} />
+      <Grid passageiros={passageiros} setPassageiros={setPassageiros} onEdit={onEdit} setOnEdit={setOnEdit}/>
     </AppContainer>
     <GlobalStyle />
    </>

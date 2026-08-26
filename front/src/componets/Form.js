@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const FormContainer = styled.div`
   display: flex;
@@ -38,26 +40,81 @@ const Button = styled.button`
   cursor: pointer;
   `
 
-const Form = ({ onEdit }) => {
+const Form = ({ onEdit, setOnEdit, getPassageiros }) => {
 
-    const ref = React.useRef();
-    
+    const nameRef = useRef();
+    const cpfRef = useRef();
+    const quantityRef = useRef();
+
+    useEffect(() => {
+        if (onEdit) {
+            nameRef.current.value = onEdit.NOME;
+            cpfRef.current.value = onEdit.CPF;
+            quantityRef.current.value = onEdit.Valor_pago;
+        }
+    }, [onEdit]);
+
+    const clearForm = () => {
+        nameRef.current.value = "";
+        cpfRef.current.value = "";
+        quantityRef.current.value = "";
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        const payload = {
+            name: nameRef.current.value,
+            cpf: cpfRef.current.value,
+            quantidade: quantityRef.current.value,
+        };
+
+        if (!payload.name || !payload.cpf || !payload.quantidade) {
+            toast.warn("Preencha todos os campos antes de enviar");
+            return;
+        }
+
+        try {
+            if (onEdit) {
+                await axios.put(`http://localhost:3001/passageiros/${onEdit.CPF}`, payload);
+                toast.success("Passageiro atualizado com sucesso");
+                setOnEdit(null);
+            } else {
+                await axios.post("http://localhost:3001/passageiros", payload);
+                toast.success("Passageiro adicionado com sucesso");
+            }
+
+            clearForm();
+            getPassageiros();
+        } catch (error) {
+            console.error("Error saving passageiro:", error);
+            toast.error("Erro ao salvar passageiro");
+        }
+    };
+
+    const handleCancel = () => {
+        setOnEdit(null);
+        clearForm();
+    };
+
     return (
-        <FormContainer>
+        <FormContainer as="form" onSubmit={handleSubmit}>
             <InputArea>
                 <Label>Nome:</Label>
-                <Input name="name" type="text"/>
+                <Input name="name" type="text" ref={nameRef} />
             </InputArea>
             <InputArea>
                 <Label>CPF:</Label>
-                <Input name="cpf" type="text"/>
+                <Input name="cpf" type="text" ref={cpfRef} />
             </InputArea>
             <InputArea>
                 <Label>Quantidade:</Label>
-                <Input name="quantity" type="number"/>
-            </InputArea> 
-            <Button type="submit">Enviar</Button>
-             <Button type="submit">Checar</Button>
+                <Input name="quantity" type="number" ref={quantityRef} />
+            </InputArea>
+            <Button type="submit">{onEdit ? "Salvar" : "Enviar"}</Button>
+            {onEdit && (
+                <Button type="button" onClick={handleCancel}>Cancelar</Button>
+            )}
         </FormContainer>
     )
 }

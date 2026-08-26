@@ -18,12 +18,12 @@ export const addPassageiro = (req, res) => {
     const cpf = body.cpf || body.CPF;
     const valor = body.Valor || body.Valor_pago || body.valor_pago || body.quantidade;
 
-   
+
     if (!nome || !cpf || !valor) {
         return res.status(400).json("Preencha todos os campos: nome, cpf e quantidade.");
     }
 
-    const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_pago`) VALUES (?)'; 
+    const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_pago`) VALUES (?)';
     const values = [nome, cpf, valor];
 
     db.query(q, [values], (err) => {
@@ -60,11 +60,11 @@ export const updatePassageiro = (req, res) => {
 export const deletePassageiro = (req, res) => {
     const id = req.params.id;
 
-    const q = 'DELETE FROM passageiros WHERE `id` = ?';
+    const q = 'DELETE FROM passageiros WHERE `CPF` = ?';
 
     db.query(q, [id], (err) => {
         if (err) {
-            return res.json(err);
+            return res.status(500).json(err);
         }
         return res.status(200).json("Passageiro deletado com sucesso");
     });
