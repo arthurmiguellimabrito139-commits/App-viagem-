@@ -3,13 +3,13 @@ import GlobalStyle from './global';
 import styled from 'styled-components';
 import Form from './componets/Form';
 import Grid from './componets/Grid';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import Login from './componets/Login'; // Importando a nova tela de login
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AppContainer = styled.div`
   width: 100%;
-  height: 800px;
+  height: 100vh; // Ajustado para não fixar em 800px
   display: flex;
   margin-top: 20px;
   flex-direction: column;
@@ -17,38 +17,63 @@ const AppContainer = styled.div`
   gap: 10px;
 `; 
 
-const Title = styled.h1`
-    
-`
+const Title = styled.h1``
 
 function App() {
- 
  const [passageiros, setPassageiros] = useState([]);
  const [onEdit, setOnEdit] = useState(null);
+ const [usuarioAtual, setUsuarioAtual] = useState(null); // Estado do login
 
  const getPassageiros = async () => {
   try {
-  const res = await axios.get("http://localhost:3001/passageiros");
+    // Verifica se tem alguém logado para não dar erro
+    if (!usuarioAtual) return; 
+
+    // Envia o perfil e o CPF de quem está logado para o back-end
+    const config = {
+        headers: {
+            'role': usuarioAtual.perfil,
+            'cpf': usuarioAtual.cpf
+        }
+    };
+
+    // Faz a requisição passando a configuração
+    const res = await axios.get("http://localhost:3001/passageiros", config);
     setPassageiros(res.data);
   } catch (error) {
     console.log(error);
   }
- }
-
+ };
+ 
  useEffect(() => {
-  getPassageiros();
- }, [setPassageiros]);
+  if (usuarioAtual) {
+    getPassageiros();
+  }
+ }, [usuarioAtual]);
  
   return (
     <>
-    
-    <AppContainer>
-      <Title>Lista de Passageiros</Title>
-      <Form onEdit={onEdit} setOnEdit={setOnEdit} getPassageiros={getPassageiros} />
-      <Grid passageiros={passageiros} setPassageiros={setPassageiros} onEdit={onEdit} setOnEdit={setOnEdit}/>
-    </AppContainer>
-    <GlobalStyle />
-   </>
+      <AppContainer>
+        {!usuarioAtual ? (
+           // Se não estiver logado, mostra o Login
+           <Login onLogin={(dados) => setUsuarioAtual(dados)} />
+        ) : (
+           // Se estiver logado, mostra o sistema
+           <>
+             <Title>Lista de Passageiros - Bem vindo, {usuarioAtual.nome}</Title>
+             <button onClick={() => setUsuarioAtual(null)} style={{ padding: '5px', marginBottom: '10px' }}>Sair</button>
+             
+             {/* Apenas admin pode ver o formulário de cadastro/edição */}
+             {usuarioAtual.perfil === 'admin' && (
+                <Form onEdit={onEdit} setOnEdit={setOnEdit} getPassageiros={getPassageiros} usuarioAtual={usuarioAtual} />
+             )}
+             
+             <Grid passageiros={passageiros} setPassageiros={setPassageiros} onEdit={onEdit} setOnEdit={setOnEdit} usuarioAtual={usuarioAtual}/>
+           </>
+        )}
+      </AppContainer>
+      <GlobalStyle />
+    </>
   );
 }
 

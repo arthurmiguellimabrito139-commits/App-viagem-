@@ -40,7 +40,7 @@ const Button = styled.button`
   cursor: pointer;
   `
 
-const Form = ({ onEdit, setOnEdit, getPassageiros }) => {
+const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
 
     const nameRef = useRef();
     const cpfRef = useRef();
@@ -60,13 +60,15 @@ const Form = ({ onEdit, setOnEdit, getPassageiros }) => {
         quantityRef.current.value = "";
     };
 
-    const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
         e.preventDefault();
 
         const payload = {
             name: nameRef.current.value,
             cpf: cpfRef.current.value,
             quantidade: quantityRef.current.value,
+            parcelas_restantes: 0
+            // adicione os novos campos aqui se necessário (ex: parcelas_restantes)
         };
 
         if (!payload.name || !payload.cpf || !payload.quantidade) {
@@ -75,12 +77,15 @@ const Form = ({ onEdit, setOnEdit, getPassageiros }) => {
         }
 
         try {
+            // Adicionando o cabeçalho de segurança com o perfil do admin
+            const config = { headers: { 'role': usuarioAtual.perfil } };
+
             if (onEdit) {
-                await axios.put(`http://localhost:3001/passageiros/${onEdit.CPF}`, payload);
+                await axios.put(`http://localhost:3001/passageiros/${onEdit.CPF}`, payload, config);
                 toast.success("Passageiro atualizado com sucesso");
                 setOnEdit(null);
             } else {
-                await axios.post("http://localhost:3001/passageiros", payload);
+                await axios.post("http://localhost:3001/passageiros", payload, config);
                 toast.success("Passageiro adicionado com sucesso");
             }
 
@@ -88,7 +93,7 @@ const Form = ({ onEdit, setOnEdit, getPassageiros }) => {
             getPassageiros();
         } catch (error) {
             console.error("Error saving passageiro:", error);
-            toast.error("Erro ao salvar passageiro");
+            toast.error(error.response?.data?.erro || "Erro ao salvar passageiro");
         }
     };
 
