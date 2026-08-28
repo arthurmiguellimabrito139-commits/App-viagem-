@@ -1,4 +1,4 @@
-# 🧳 App-loja — Sistema de Controle de Passageiros e Pagamentos
+# 🧳 App-Viagem — Sistema de Controle de Passageiros e Pagamentos
 
 Sistema web para gerenciar passageiros de uma viagem, permitindo que o **administrador** controle os pagamentos e parcelas de cada participante, enquanto cada **passageiro** consegue apenas visualizar sua própria situação.
 
