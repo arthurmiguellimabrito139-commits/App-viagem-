@@ -7,6 +7,10 @@ export const getPassageiro = (req, res) => {
     const role = req.headers['role'];
     const cpf = req.headers['cpf'];
 
+    if (!role || (role !== 'admin' && !cpf)) {
+        return res.status(401).json({ erro: 'Informe o perfil e o CPF do usuário.' });
+    }   
+
     let q = '';
     let values = [];
 
@@ -36,23 +40,30 @@ export const addPassageiro = (req, res) => {
     const cpf = body.cpf || body.CPF;
     const valor = body.valor_pago || body.Valor || body.Valor_pago || body.quantidade;
     const parcelas = body.parcelas_restantes || body.parcelasRestantes || 0;
-
+    const NumeroDeParcelas = body.NumeroDeParcelas || 0;
+    const ValorParcela = body.ValorParcela || 0;
+    const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
     try {
 
-        const novoPassageiro = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelas));
+        const novoPassageiro = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelas), parseInt(NumeroDeParcelas), parseFloat(ValorParcela));
 
-        const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_pago`, `parcelas_restantes`) VALUES (?)';
+        const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_pago`, `parcelas_restantes`, `NumeroParcelas`, `ValorParcela`) VALUES (?)';
         const values = [
             novoPassageiro.nome,
             novoPassageiro.cpf,
             novoPassageiro.valorPago,
-            novoPassageiro.parcelasRestantes
+            novoPassageiro.parcelasRestantes,
+            novoPassageiro.NumeroDeParcelas,
+            novoPassageiro.ValorParcela
         ];
 
         // 3. Salva no banco de dados
         db.query(q, [values], (err) => {
             if (err) {
-                return res.status(500).json(err);
+                if (err.code === 'ER_DUP_ENTRY') {
+                    return res.status(409).json({ erro: 'Já existe um passageiro cadastrado com este CPF.' });
+                }
+                return res.status(500).json({ erro: 'Erro ao salvar passageiro no banco de dados.' });
             }
             return res.status(201).json("Passageiro adicionado com sucesso");
         });
@@ -71,19 +82,23 @@ export const updatePassageiro = (req, res) => {
     const cpf = body.cpf || body.CPF;
     const valor = body.valor_pago || body.Valor || body.Valor_pago || body.quantidade;
     const parcelas = body.parcelas_restantes || body.parcelasRestantes;
+    const NumeroDeParcelas = body.NumeroDeParcelas || 0;
+    const ValorParcela = body.ValorParcela || 0;
 
     try {
         // Usamos a classe novamente para garantir que os dados atualizados também são válidos
-        const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelas));
+        const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelas), parseInt(NumeroDeParcelas), parseFloat(ValorParcela));
 
-        const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_pago` = ?, `parcelas_restantes` = ? WHERE `id` = ?';
+        const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_pago` = ?, `parcelas_restantes` = ?, `NumeroParcelas` = ?, `ValorParcela` = ?';
 
         const values = [
             passageiroAtualizado.nome,
             passageiroAtualizado.cpf,
             passageiroAtualizado.valorPago,
             passageiroAtualizado.parcelasRestantes,
-            id
+            passageiroAtualizado.NumeroDeParcelas,
+            passageiroAtualizado.ValorParcela,
+            
         ];
 
         // Note que aqui passamos 'values' direto (sem ser um array dentro de outro array), 

@@ -4,8 +4,11 @@ import styled from 'styled-components';
 import Form from './componets/Form';
 import Grid from './componets/Grid';
 import Login from './componets/Login'; // Importando a nova tela de login
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import FotosLocal from './componets/FotosLocal';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AppContainer = styled.div`
   width: 100%;
@@ -24,7 +27,7 @@ function App() {
  const [onEdit, setOnEdit] = useState(null);
  const [usuarioAtual, setUsuarioAtual] = useState(null); // Estado do login
 
- const getPassageiros = async () => {
+ const getPassageiros = useCallback(async () => {
   try {
     // Verifica se tem alguém logado para não dar erro
     if (!usuarioAtual) return; 
@@ -43,13 +46,13 @@ function App() {
   } catch (error) {
     console.log(error);
   }
- };
+ }, [usuarioAtual]);
  
  useEffect(() => {
   if (usuarioAtual) {
     getPassageiros();
   }
- }, [usuarioAtual]);
+   }, [usuarioAtual, getPassageiros]);
  
   return (
     <>
@@ -57,21 +60,24 @@ function App() {
         {!usuarioAtual ? (
            // Se não estiver logado, mostra o Login
            <Login onLogin={(dados) => setUsuarioAtual(dados)} />
+           
         ) : (
            // Se estiver logado, mostra o sistema
            <>
              <Title>Lista de Passageiros - Bem vindo, {usuarioAtual.nome}</Title>
              <button onClick={() => setUsuarioAtual(null)} style={{ padding: '5px', marginBottom: '10px' }}>Sair</button>
-             
+            
              {/* Apenas admin pode ver o formulário de cadastro/edição */}
              {usuarioAtual.perfil === 'admin' && (
                 <Form onEdit={onEdit} setOnEdit={setOnEdit} getPassageiros={getPassageiros} usuarioAtual={usuarioAtual} />
              )}
              
              <Grid passageiros={passageiros} setPassageiros={setPassageiros} onEdit={onEdit} setOnEdit={setOnEdit} usuarioAtual={usuarioAtual}/>
+             <FotosLocal />
            </>
         )}
       </AppContainer>
+      <ToastContainer />
       <GlobalStyle />
     </>
   );

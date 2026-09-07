@@ -6,12 +6,27 @@ const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px;
+  padding: 40px; /* Aumentado para dar mais respiro interno */
   background-color: #ffffff;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15); /* Sombra levemente mais forte */
   border-radius: 8px;
   gap: 20px;
-  width: 350px;
+  width: 90%; 
+  max-width: 450px; /* Aumentado de 350px para 450px para deixar a caixa maior */
+
+  @media (max-width: 400px) {
+    padding: 25px 20px;
+  }
+`;
+
+const Logo = styled.h1`
+  font-size: 28px;
+  color: #007BFF; /* Usando o mesmo azul do seu botão, mas você pode mudar */
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 `;
 
 const InputGroup = styled.div`
@@ -25,6 +40,7 @@ const Input = styled.input`
   padding: 10px;
   border: 1px solid #bbb;
   border-radius: 5px;
+  width: 100%; /* Garante que o input não vaze o limite */
 `;
 
 const Button = styled.button`
@@ -75,7 +91,7 @@ const Login = ({ onLogin }) => {
     return (
         <LoginContainer as="form" onSubmit={handleLogin}>
             <h2>Login</h2>
-            
+            <Logo>Britto`s Turismo</Logo>
             <RadioGroup>
                 <label>
                     <input 
@@ -131,6 +147,7 @@ const Login = ({ onLogin }) => {
             )}
 
             <Button type="submit">Entrar</Button>
+            
         </LoginContainer>
     );
 };

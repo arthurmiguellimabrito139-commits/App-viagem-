@@ -13,7 +13,16 @@ const FormContainer = styled.div`
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   background-color: #ffffff;
+
+  /* Responsividade: Empilha os campos no celular */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 90%;
+    margin: 0 auto; /* Mantém centralizado na tela */
+    align-items: stretch; /* Faz os itens esticarem até as bordas */
+  }
 `
+
 const InputArea = styled.div`
   display: flex;
   flex-direction: column;
@@ -27,30 +36,48 @@ const Input = styled.input`
   padding: 8px 10px;
   border: 1px solid #bbb;
   border-radius: 5px;
+
+  /* Responsividade: Ocupa a largura total da tela pequena */
+  @media (max-width: 768px) {
+    width: 100%;
+    box-sizing: border-box; /* Garante que o padding não quebre a largura */
+  }
 `
 
 const Button = styled.button`
   display: flex;
   flex-direction: column;
+  align-items: center; /* Centraliza o texto no botão */
   margin-top: 28px;
   padding: 10px 20px;
   background-color: #007BFF;
   border-radius: 5px;
   color: white;
   cursor: pointer;
-  `
+
+  /* Responsividade: Ajusta a margem e largura para o formato vertical */
+  @media (max-width: 768px) {
+    margin-top: 10px; /* Reduz o espaço acima do botão no celular */
+    width: 100%;
+  }
+`
 
 const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
 
     const nameRef = useRef();
     const cpfRef = useRef();
     const quantityRef = useRef();
-
+    const NumeroDeParcelasRef = useRef();
+    const ValorParcelaRef = useRef();
+    const parcelasRestantes = useRef();
     useEffect(() => {
         if (onEdit) {
             nameRef.current.value = onEdit.NOME;
             cpfRef.current.value = onEdit.CPF;
             quantityRef.current.value = onEdit.Valor_pago;
+            NumeroDeParcelasRef.current.value = onEdit.NumeroDeParcelas;
+            ValorParcelaRef.current.value = onEdit.ValorParcela;
+            parcelasRestantes.current.value = onEdit.parcelas_restantes;
         }
     }, [onEdit]);
 
@@ -58,6 +85,9 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
         nameRef.current.value = "";
         cpfRef.current.value = "";
         quantityRef.current.value = "";
+        NumeroDeParcelasRef.current.value = "";
+        ValorParcelaRef.current.value = "";
+        parcelasRestantes.current.value = "";
     };
 
    const handleSubmit = async (e) => {
@@ -67,11 +97,13 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
             name: nameRef.current.value,
             cpf: cpfRef.current.value,
             quantidade: quantityRef.current.value,
-            parcelas_restantes: 0
+            parcelas_restantes: parcelasRestantes.current.value,
+            NumeroDeParcelas: NumeroDeParcelasRef.current.value,
+            ValorParcela: ValorParcelaRef.current.value
             // adicione os novos campos aqui se necessário (ex: parcelas_restantes)
         };
 
-        if (!payload.name || !payload.cpf || !payload.quantidade) {
+        if (!payload.name || !payload.cpf || !payload.quantidade || !payload.NumeroDeParcelas || !payload.ValorParcela) {
             toast.warn("Preencha todos os campos antes de enviar");
             return;
         }
@@ -113,8 +145,21 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
                 <Input name="cpf" type="text" ref={cpfRef} />
             </InputArea>
             <InputArea>
-                <Label>Quantidade:</Label>
+                <Label>Valor Pago:</Label>
                 <Input name="quantity" type="number" ref={quantityRef} />
+            </InputArea>
+            <InputArea>
+                <Label>Parcelas Restantes:</Label>
+                <Input name="parcelas_restantes" type="number" ref={parcelasRestantes} /> 
+            </InputArea>
+        
+            <InputArea>
+                <Label>Número de Parcelas:</Label>
+                <Input name="NumeroDeParcelas" type="number" ref={NumeroDeParcelasRef} />
+            </InputArea>
+            <InputArea>
+                <Label>Valor da Parcela:</Label>
+                <Input name="ValorParcela" type="number" step="0.01" ref={ValorParcelaRef} />
             </InputArea>
             <Button type="submit">{onEdit ? "Salvar" : "Enviar"}</Button>
             {onEdit && (
