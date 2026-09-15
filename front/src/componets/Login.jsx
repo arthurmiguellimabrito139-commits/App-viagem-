@@ -133,8 +133,6 @@ const Login = ({ onLogin }) => {
                 />
             </InputGroup>
 
-            {/* O campo de senha (palavra-passe) só aparece se o perfil for admin */}
-            {perfil === 'admin' && (
                 <InputGroup>
                     <label>Senha:</label>
                     <Input 
@@ -144,7 +142,7 @@ const Login = ({ onLogin }) => {
                         onChange={(e) => setSenha(e.target.value)} 
                     />
                 </InputGroup>
-            )}
+            
 
             <Button type="submit">Entrar</Button>
             
