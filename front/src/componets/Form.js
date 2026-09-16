@@ -1,11 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import axios from 'axios';
+import api from '../api';
 import { toast } from 'react-toastify';
 
 const FormContainer = styled.div`
   display: flex;
   flex-direction: row;
+    width: min(100%, 1200px);
   align-items: center;
   justify-content: center;
   padding: 20px;
@@ -17,31 +18,33 @@ const FormContainer = styled.div`
   /* Responsividade: Empilha os campos no celular */
   @media (max-width: 768px) {
     flex-direction: column;
-    width: 90%;
+        width: min(100%, 520px);
+        padding: 16px;
     margin: 0 auto; /* Mantém centralizado na tela */
     align-items: stretch; /* Faz os itens esticarem até as bordas */
   }
+
+    @media (min-width: 769px) and (max-width: 1100px) {
+        flex-wrap: wrap;
+    }
 `
 
 const InputArea = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+    width: 100%;
 `
 
 const Label = styled.label``
 
 const Input = styled.input`
-  width: 200px;
+    width: 100%;
+    min-width: 0;
   padding: 8px 10px;
   border: 1px solid #bbb;
   border-radius: 5px;
 
-  /* Responsividade: Ocupa a largura total da tela pequena */
-  @media (max-width: 768px) {
-    width: 100%;
-    box-sizing: border-box; /* Garante que o padding não quebre a largura */
-  }
 `
 
 const Button = styled.button`
@@ -110,14 +113,14 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
 
         try {
             // Adicionando o cabeçalho de segurança com o perfil do admin
-            const config = { headers: { 'role': usuarioAtual.perfil } };
+           const config = { headers: { 'Authorization': `Bearer ${usuarioAtual.token}` } };
 
             if (onEdit) {
-                await axios.put(`http://localhost:3001/passageiros/${onEdit.CPF}`, payload, config);
+                await api.put(`/passageiros/${onEdit.CPF}`, payload, config);
                 toast.success("Passageiro atualizado com sucesso");
                 setOnEdit(null);
             } else {
-                await axios.post("http://localhost:3001/passageiros", payload, config);
+                await api.post("/passageiros", payload, config);
                 toast.success("Passageiro adicionado com sucesso");
             }
 

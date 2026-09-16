@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import axios from 'axios'; // Não se esqueça de importar o axios
+import api from '../api';
 
 const LoginContainer = styled.div`
   display: flex;
@@ -15,7 +15,8 @@ const LoginContainer = styled.div`
   max-width: 450px; /* Aumentado de 350px para 450px para deixar a caixa maior */
 
   @media (max-width: 400px) {
-    padding: 25px 20px;
+        width: 100%;
+        padding: 24px 16px;
   }
 `;
 
@@ -57,7 +58,14 @@ const Button = styled.button`
 const RadioGroup = styled.div`
   display: flex;
   justify-content: space-around;
+    gap: 12px;
   width: 100%;
+
+    @media (max-width: 360px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
 `;
 
 const Login = ({ onLogin }) => {
@@ -71,7 +79,7 @@ const Login = ({ onLogin }) => {
         
         try {
             // Envia os dados digitados para o back-end validar
-            const resposta = await axios.post('http://localhost:3001/login', {
+            const resposta = await api.post('/login', {
                 perfil,
                 nome,
                 cpf,
@@ -114,18 +122,9 @@ const Login = ({ onLogin }) => {
             </RadioGroup>
 
             <InputGroup>
-                <label>Nome:</label>
-                <Input 
-                    type="text" 
-                    required 
-                    value={nome} 
-                    onChange={(e) => setNome(e.target.value)} 
-                />
-            </InputGroup>
-
-            <InputGroup>
                 <label>CPF:</label>
                 <Input 
+                    placeholder="Ex: 12345678900"
                     type="text" 
                     required 
                     value={cpf} 
@@ -134,8 +133,9 @@ const Login = ({ onLogin }) => {
             </InputGroup>
 
                 <InputGroup>
-                    <label>Senha:</label>
+                    <label>{perfil === 'admin' ? 'Senha:' : 'Senha (últimos 4 dígitos do CPF):'}</label>
                     <Input 
+                        placeholder={perfil === 'admin' ? "Digite sua senha" : "Ex: 8900"}
                         type="password" 
                         required 
                         value={senha} 

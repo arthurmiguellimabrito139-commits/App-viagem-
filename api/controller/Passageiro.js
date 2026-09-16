@@ -1,25 +1,18 @@
 import { db } from '../db.js';
+import bcrypt from 'bcrypt';
 import { Passageiro } from '../models/Passageiro.js'; // Importando nossa classe com as regras
+
 
 // Leitura: Qualquer usuário logado pode acessar
 export const getPassageiro = (req, res) => {
-    // Puxa as informações que o front-end enviou no cabeçalho
-    const role = req.headers['role'];
-    const cpf = req.headers['cpf'];
-
-    if (!role || (role !== 'admin' && !cpf)) {
-        return res.status(401).json({ erro: 'Informe o perfil e o CPF do usuário.' });
-    }   
+    const { perfil, cpf } = req.usuario;
 
     let q = '';
     let values = [];
 
-    // Se for administrador, a query busca todos os registros
-    if (role === 'admin') {
+    if (perfil === 'admin') {
         q = 'SELECT * FROM passageiros';
-    } 
-    // Se for passageiro, a query busca apenas onde o CPF for igual ao do login
-    else {
+    } else {
         q = 'SELECT * FROM passageiros WHERE CPF = ?';
         values = [cpf];
     }
@@ -32,7 +25,7 @@ export const getPassageiro = (req, res) => {
     });
 };
 // Escrita: Criação (Protegida pela rota/middleware)
-export const addPassageiro = (req, res) => {
+export const addPassageiro = async (req, res) => {
     const body = req.body || {};
 
     // Recebe os dados da requisição
@@ -44,17 +37,28 @@ export const addPassageiro = (req, res) => {
     const ValorParcela = body.ValorParcela || 0;
     const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
     try {
+        const novoPassageiro = new Passageiro(
+            nome,
+            cpf,
+            parseFloat(valor),
+            parseInt(parcelasRestantes),
+            parseInt(NumeroDeParcelas),
+            parseFloat(ValorParcela)
+        );
 
-        const novoPassageiro = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelas), parseInt(NumeroDeParcelas), parseFloat(ValorParcela));
+        const ultimosDigitos = novoPassageiro.cpf.slice(-4);
+        const senhaHash = await bcrypt.hash(ultimosDigitos, 10);
 
-        const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_pago`, `parcelas_restantes`, `NumeroParcelas`, `ValorParcela`) VALUES (?)';
+        const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_pago`, `parcelas_restantes`, `NumeroParcelas`, `ValorParcela`, `senha`, `precisa_trocar_senha`) VALUES (?)';
         const values = [
             novoPassageiro.nome,
             novoPassageiro.cpf,
             novoPassageiro.valorPago,
             novoPassageiro.parcelasRestantes,
             novoPassageiro.NumeroDeParcelas,
-            novoPassageiro.ValorParcela
+            novoPassageiro.ValorParcela,
+            senhaHash,
+            true
         ];
 
         // 3. Salva no banco de dados
@@ -98,7 +102,7 @@ export const updatePassageiro = (req, res) => {
             passageiroAtualizado.parcelasRestantes,
             passageiroAtualizado.NumeroDeParcelas,
             passageiroAtualizado.ValorParcela,
-            
+
         ];
 
         // Note que aqui passamos 'values' direto (sem ser um array dentro de outro array), 
@@ -127,4 +131,32 @@ export const deletePassageiro = (req, res) => {
         }
         return res.status(200).json("Passageiro deletado com sucesso");
     });
+};
+export const trocarSenhaPassageiro = async (req, res) => {
+    const body = req.body || {};
+    const novaSenha = body.novaSenha;
+    const cpf = req.usuario.cpf; // vem do token, não do body
+
+    if (!novaSenha) {
+        return res.status(400).json({ erro: 'Informe a nova senha.' });
+    }
+
+    if (novaSenha.length < 4) {
+        return res.status(400).json({ erro: 'A senha precisa ter pelo menos 4 caracteres.' });
+    }
+
+    try {
+        const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+        const q = 'UPDATE passageiros SET `senha` = ?, `precisa_trocar_senha` = false WHERE `CPF` = ?';
+
+        db.query(q, [novaSenhaHash, cpf], (err, result) => {
+            if (err) return res.status(500).json(err);
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ erro: 'Passageiro não encontrado.' });
+            }
+            return res.status(200).json({ mensagem: 'Senha atualizada com sucesso.' });
+        });
+    } catch (error) {
+        return res.status(500).json({ erro: 'Erro ao atualizar a senha.' });
+    }
 };

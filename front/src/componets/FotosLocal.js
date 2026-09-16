@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const GalleryContainer = styled.div`
-  width: 100%;
+  width: min(100%, 900px);
   max-width: 900px;
   background-color: #ffffff;
   padding: 25px;
@@ -10,6 +10,10 @@ const GalleryContainer = styled.div`
   border-radius: 8px;
   margin: 20px auto;
   text-align: center;
+
+  @media (max-width: 480px) {
+    padding: 16px 12px;
+  }
 `;
 
 const Title = styled.h2`
@@ -19,15 +23,15 @@ const Title = styled.h2`
 `;
 
 const ImageGrid = styled.div`
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 15px;
-  justify-content: center;
 `;
 
 const Image = styled.img`
-  width: 250px;
-  height: 180px;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 3;
   object-fit: cover;
   border-radius: 8px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
