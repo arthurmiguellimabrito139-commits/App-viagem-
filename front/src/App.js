@@ -7,6 +7,7 @@ import Login from './componets/Login'; // Importando a nova tela de login
 import { useState, useEffect, useCallback } from 'react';
 import api from './api';
 import FotosLocal from './componets/FotosLocal';
+import PainelPassageiro from './componets/PainelPassageiro';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import TrocarSenha from './componets/TrocarSenha'
@@ -56,13 +57,12 @@ function App() {
       // Verifica se tem alguém logado para não dar erro
       if (!usuarioAtual) return;
 
-      // Envia o perfil e o CPF de quem está logado para o back-end
+      // Envia o token de quem está logado
       const config = {
         headers: {
           'Authorization': `Bearer ${usuarioAtual.token}`
         }
       };
-
 
       // Faz a requisição passando a configuração
       const res = await api.get("/passageiros", config);
@@ -101,7 +101,12 @@ function App() {
               <Form onEdit={onEdit} setOnEdit={setOnEdit} getPassageiros={getPassageiros} usuarioAtual={usuarioAtual} />
             )}
 
-            <Grid passageiros={passageiros} setPassageiros={setPassageiros} onEdit={onEdit} setOnEdit={setOnEdit} usuarioAtual={usuarioAtual} />
+            {usuarioAtual.perfil === 'admin' ? (
+              <Grid passageiros={passageiros} setPassageiros={setPassageiros} onEdit={onEdit} setOnEdit={setOnEdit} usuarioAtual={usuarioAtual} />
+            ) : (
+              <PainelPassageiro passageiro={passageiros[0]} />
+            )}
+
             <FotosLocal />
           </>
         )}
