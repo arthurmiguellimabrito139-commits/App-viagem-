@@ -93,7 +93,7 @@ export const updatePassageiro = (req, res) => {
         // Usamos a classe novamente para garantir que os dados atualizados também são válidos
         const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelas), parseInt(NumeroDeParcelas), parseFloat(ValorParcela));
 
-        const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_pago` = ?, `parcelas_restantes` = ?, `NumeroParcelas` = ?, `ValorParcela` = ?';
+       const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_pago` = ?, `parcelas_restantes` = ?, `NumeroParcelas` = ?, `ValorParcela` = ? WHERE `CPF` = ?';
 
         const values = [
             passageiroAtualizado.nome,
@@ -102,7 +102,7 @@ export const updatePassageiro = (req, res) => {
             passageiroAtualizado.parcelasRestantes,
             passageiroAtualizado.NumeroDeParcelas,
             passageiroAtualizado.ValorParcela,
-
+            id, // CPF original (o :id da rota), pra saber qual linha atualizar
         ];
 
         // Note que aqui passamos 'values' direto (sem ser um array dentro de outro array), 
