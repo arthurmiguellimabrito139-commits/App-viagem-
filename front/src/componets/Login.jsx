@@ -70,7 +70,6 @@ const RadioGroup = styled.div`
 
 const Login = ({ onLogin }) => {
     const [perfil, setPerfil] = useState('passageiro');
-    const [nome, setNome] = useState('');
     const [cpf, setCpf] = useState('');
     const [senha, setSenha] = useState('');
 
@@ -81,7 +80,6 @@ const Login = ({ onLogin }) => {
             // Envia os dados digitados para o back-end validar
             const resposta = await api.post('/login', {
                 perfil,
-                nome,
                 cpf,
                 senha
             });
