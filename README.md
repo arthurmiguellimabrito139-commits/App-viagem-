@@ -2,13 +2,21 @@
 
 Sistema web para gerenciar passageiros de uma viagem, permitindo que o **administrador** controle os pagamentos e parcelas de cada participante, enquanto cada **passageiro** consegue apenas visualizar sua própria situação.
 
-Projeto full stack construído com **Node.js + Express + MySQL** no back-end e **React** no front-end, usando classes e herança para modelar os perfis de usuário (`Usuario` → `Administrador` / `Passageiro`).
+Projeto full stack construído com **Node.js + Express + MySQL** no back-end e **React** no front-end, com autenticação via **JWT** e senhas protegidas com **bcrypt**.
+
+🔗 **Deploy:**
+- Front-end: [Vercel](https://vercel.com)
+- API: [Render](https://render.com)
+- Banco de dados: [Clever Cloud](https://www.clever-cloud.com) (MySQL)
 
 ---
 
 ## ✨ Funcionalidades
 
-- 🔐 **Login por perfil** — o usuário escolhe entre `Passageiro` e `Admin` na tela de login (admin precisa de senha).
+- 🔐 **Login por perfil** — o usuário escolhe entre `Passageiro` e `Admin` na tela de login.
+- 🔑 **Autenticação via JWT** — o back-end gera um token no login, e todas as rotas protegidas exigem esse token (`Authorization: Bearer <token>`). Nenhuma rota confia em dados soltos enviados pelo cliente.
+- 🔒 **Senhas protegidas com bcrypt** — tanto o admin quanto o passageiro têm a senha armazenada como hash, nunca em texto puro.
+- 🆕 **Senha temporária para passageiros** — todo passageiro nasce com senha igual aos 4 últimos dígitos do próprio CPF (hasheada), e é **obrigado a trocar** essa senha no primeiro login.
 - 👀 **Passageiro** só visualiza os seus próprios dados de pagamento.
 - 🛠️ **Admin** pode cadastrar, editar e excluir passageiros, além de ver a lista completa.
 - 💳 Controle de **valor pago** e **parcelas restantes** por passageiro.
@@ -19,40 +27,65 @@ Projeto full stack construído com **Node.js + Express + MySQL** no back-end e *
 ## 🏗️ Arquitetura
 
 ```
-App-loja-main/
-├── api/                     # Back-end (Node.js + Express)
-│   ├── controller/          # Regras de negócio das rotas (Auth, Passageiro)
-│   ├── middleware/          # Middleware de autorização (apenasAdmin)
-│   ├── models/               # Classes de domínio (OOP)
-│   │   ├── Usuario.js        # Classe base (nome, cpf, role)
-│   │   ├── Administrador.js  # Extends Usuario
-│   │   ├── Passageiro.js     # Extends Usuario (valorPago, parcelasRestantes)
-│   │   └── PerfilUsuario.js  # Enum de perfis (admin / passageiro)
-│   ├── route/                # Rotas Express
-│   ├── db.js                 # Conexão com o MySQL
-│   └── index.js              # Ponto de entrada da API
+App-viagem-/
+├── api/                       # Back-end (Node.js + Express)
+│   ├── controller/
+│   │   ├── Auth.js            # Login (admin/passageiro) + geração do JWT
+│   │   └── Passageiro.js      # CRUD de passageiros + troca de senha
+│   ├── middleware/
+│   │   └── auth.js            # verificarToken (valida JWT) e apenasAdmin (checa perfil)
+│   ├── models/                # Classes de domínio (OOP)
+│   │   ├── Usuario.js
+│   │   ├── Administrador.js
+│   │   ├── Passageiro.js
+│   │   └── PerfilUsuario.js
+│   ├── route/
+│   │   └── passageiros.js
+│   ├── db.js                  # Conexão com o MySQL
+│   └── index.js                # Ponto de entrada da API (CORS, porta, rotas)
 │
-└── front/                    # Front-end (React)
+└── front/                      # Front-end (React)
     └── src/
+        ├── api.js               # Instância central do axios (usa REACT_APP_API_URL)
         ├── componets/
-        │   ├── Login.jsx      # Tela de login
-        │   ├── Form.js        # Formulário de cadastro/edição (admin)
-        │   └── Grid.js        # Tabela de passageiros
-        └── App.js             # Componente raiz / orquestração de estado
+        │   ├── Login.jsx        # Tela de login
+        │   ├── TrocarSenha.jsx  # Troca de senha obrigatória no 1º login do passageiro
+        │   ├── Form.js          # Formulário de cadastro/edição (admin)
+        │   └── Grid.js          # Tabela de passageiros
+        └── App.js                # Componente raiz / orquestração de estado
 ```
-
-O modelo de domínio usa **herança**: `Administrador` e `Passageiro` estendem `Usuario`, e cada um carrega apenas as regras que fazem sentido para o seu papel — por exemplo, só `Passageiro` tem `realizarPagamento()`.
 
 ---
 
-## 🚀 Como rodar o projeto
+## 🚀 Como rodar localmente
 
 ### Pré-requisitos
 - Node.js instalado
-- MySQL instalado e rodando localmente
+- MySQL instalado e rodando localmente (ou uma instância hospedada, tipo Clever Cloud)
 
 ### 1. Banco de dados
-Crie o banco `viagem` no MySQL com as tabelas `administradores` e `passageiros` (colunas usadas pelo código: `NOME`, `CPF`, `Valor_pago`, `parcelas_restantes` em `passageiros`; `nome`, `cpf`, `senha` em `administradores`).
+Crie as tabelas:
+```sql
+CREATE TABLE administradores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    cpf VARCHAR(14) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE passageiros (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    NOME VARCHAR(100) NOT NULL,
+    CPF VARCHAR(14) NOT NULL UNIQUE,
+    Valor_pago DECIMAL(10,2),
+    parcelas_restantes INT,
+    NumeroParcelas INT,
+    ValorParcela DECIMAL(10,2),
+    senha VARCHAR(255),
+    precisa_trocar_senha BOOLEAN DEFAULT false
+);
+```
+As senhas nunca são inseridas em texto puro — use `bcrypt.hash` antes de qualquer `INSERT`/`UPDATE` manual na coluna `senha`.
 
 ### 2. Back-end
 ```bash
@@ -60,15 +93,17 @@ cd api
 npm install
 npm start
 ```
-A API sobe em `http://localhost:3001`.
-
-> Crie um arquivo `.env` dentro de `api/` (não versionado) com:
-> ```
-> DB_HOST=localhost
-> DB_USER=root
-> DB_PASSWORD=sua_senha
-> DB_NAME=viagem
-> ```
+Crie um `.env` dentro de `api/` (não versionado) com:
+```
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=sua_senha
+DB_NAME=viagem
+JWT_SECRET=uma_string_aleatoria_bem_grande
+FRONT_URL=http://localhost:3000
+PORT=3001
+```
+A API sobe na porta definida em `PORT` (padrão `3001`).
 
 ### 3. Front-end
 ```bash
@@ -76,40 +111,47 @@ cd front
 npm install
 npm start
 ```
+Crie um `.env` dentro de `front/` (não versionado) com:
+```
+REACT_APP_API_URL=http://localhost:3001
+```
 A aplicação abre em `http://localhost:3000`.
 
 ---
 
 ## 🔌 Rotas da API
 
-| Método | Rota                | Acesso           | Descrição                              |
-|--------|----------------------|-------------------|------------------------------------------|
-| POST   | `/login`             | Público           | Autentica passageiro ou admin            |
-| GET    | `/passageiros`       | Logado            | Lista todos (admin) ou só o próprio (passageiro) |
-| POST   | `/passageiros`       | Somente admin     | Cadastra um novo passageiro              |
-| PUT    | `/passageiros/:id`   | Somente admin     | Atualiza dados de um passageiro          |
-| DELETE | `/passageiros/:id`   | Somente admin     | Remove um passageiro (usa o CPF como id) |
+| Método | Rota                  | Acesso                          | Descrição                                        |
+|--------|------------------------|-----------------------------------|----------------------------------------------------|
+| POST   | `/login`               | Público                          | Autentica passageiro ou admin, retorna o JWT      |
+| GET    | `/passageiros`         | Token válido                     | Lista todos (admin) ou só o próprio (passageiro)  |
+| POST   | `/passageiros`         | Token válido + admin             | Cadastra um novo passageiro                       |
+| PUT    | `/passageiros/senha`   | Token válido                     | Troca a própria senha (usada no 1º login)         |
+| PUT    | `/passageiros/:id`     | Token válido + admin             | Atualiza dados de um passageiro                   |
+| DELETE | `/passageiros/:id`     | Token válido + admin             | Remove um passageiro (usa o CPF como id)          |
+
+Todas as rotas protegidas exigem o header:
+```
+Authorization: Bearer <token recebido no /login>
+```
 
 ---
 
 ## ⚠️ Pontos de atenção (para evoluir o projeto)
 
-Alguns pontos valem ajuste antes de ir para produção ou de virar entrega final:
+A maioria dos riscos de segurança da versão inicial já foi resolvida (autenticação por JWT, hash de senha, CORS restrito, porta/URL configuráveis). O que ainda vale considerar:
 
-1. **Autorização via header, não por token.** O middleware `apenasAdmin` confia no header `role` enviado pelo próprio front (`req.headers['role']`), que qualquer pessoa pode forjar com um `curl`. O próprio código já comenta isso (*"Em produção, isso virá do token JWT"*) — vale implementar JWT ou sessão de verdade.
-2. **Senha do admin em texto puro.** `fazerLogin` compara `senha` diretamente com o banco (`WHERE cpf = ? AND senha = ?`), sem hash. O ideal é usar `bcrypt` para armazenar e comparar senhas.
-3. **URL da API fixa no front.** `http://localhost:3001` está hardcoded em `App.js`, `Form.js` e `Grid.js`. Colocar em uma variável de ambiente (`REACT_APP_API_URL`) evita precisar editar código para trocar de ambiente (dev/produção).
-4. **`package.json` duplicado.** Existe um `package.json` na raiz e outro dentro de `api/`, praticamente idênticos — dá para manter só um dos dois.
-5. **Arquivo estranho em `front/public/package.json`.** Parece ter sido criado por engano dentro da pasta `public` (não deveria existir ali) e ainda tem uma dependência com o nome errado (`style-components` em vez de `styled-components`). Vale apagar esse arquivo.
-6. **Métodos não utilizados.** `Passageiro.realizarPagamento()` e `Administrador.validarAlteracaoDeDados()` existem nos models mas não são chamados em nenhum controller — o `updatePassageiro` recria o objeto do zero em vez de usar essas regras. Boa oportunidade para conectar a lógica de domínio de fato às rotas.
-7. **`DELETE /passageiros/:id` na verdade espera um CPF.** Funciona, mas o nome do parâmetro (`:id`) pode confundir; renomear para `:cpf` deixa a intenção mais clara.
-8. **Sem porta configurável.** `app.listen(3001)` está fixo; usar `process.env.PORT || 3001` facilita o deploy.
-
-Nenhum desses pontos impede o projeto de funcionar — são melhorias naturais para uma segunda versão, principalmente a parte de autenticação/autorização se isso for sair do ambiente de estudo.
+1. **Plano gratuito do banco (Clever Cloud "DEV").** Não tem backup automático nem SLA — exporte um dump de tempos em tempos.
+2. **Cold start no Render (plano free).** A API "dorme" depois de um tempo sem uso; a primeira requisição depois disso demora ~30-50s.
+3. **`Deployment Protection` do Vercel.** Confirme que o domínio de produção está público (sem exigir login do Vercel) antes de divulgar o link para os passageiros.
+4. **Métodos não utilizados nos models.** `Passageiro.realizarPagamento()` e `Administrador.validarAlteracaoDeDados()` existem mas não são chamados em nenhum controller.
+5. **`DELETE /passageiros/:id` na verdade espera um CPF.** Funciona, mas renomear o parâmetro para `:cpf` deixaria a intenção mais clara.
+6. **`api/package.json`** — o script `start` roda `node index.js` (produção); use `npm run dev` (com `nodemon`) durante o desenvolvimento local.
 
 ---
 
 ## 🛠️ Tecnologias
 
-**Back-end:** Node.js, Express, MySQL (`mysql2`), dotenv, cors
+**Back-end:** Node.js, Express, MySQL (`mysql2`), bcrypt, jsonwebtoken, dotenv, cors
 **Front-end:** React, styled-components, axios, react-toastify, react-icons
+**Infraestrutura:** Vercel (front), Render (API), Clever Cloud (MySQL)
