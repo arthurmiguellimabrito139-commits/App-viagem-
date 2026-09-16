@@ -18,10 +18,11 @@ const allowedOrigins = [
     "http://127.0.0.1:3000",
     "http://192.168.100.116:3000"
 ].filter(Boolean);
-
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        const ehVercelPreview = origin && /\.vercel\.app$/.test(origin);
+
+        if (!origin || allowedOrigins.includes(origin) || ehVercelPreview) {
             return callback(null, true);
         }
 
