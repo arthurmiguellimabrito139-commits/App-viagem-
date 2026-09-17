@@ -71,7 +71,6 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
     const cpfRef = useRef();
     const quantityRef = useRef();
     const NumeroDeParcelasRef = useRef();
-    const ValorParcelaRef = useRef();
     const parcelasRestantes = useRef();
     useEffect(() => {
         if (onEdit) {
@@ -79,7 +78,6 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
             cpfRef.current.value = onEdit.CPF;
             quantityRef.current.value = onEdit.Valor_pago;
             NumeroDeParcelasRef.current.value = onEdit.NumeroDeParcelas;
-            ValorParcelaRef.current.value = onEdit.ValorParcela;
             parcelasRestantes.current.value = onEdit.parcelas_restantes;
         }
     }, [onEdit]);
@@ -89,7 +87,6 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
         cpfRef.current.value = "";
         quantityRef.current.value = "";
         NumeroDeParcelasRef.current.value = "";
-        ValorParcelaRef.current.value = "";
         parcelasRestantes.current.value = "";
     };
 
@@ -102,11 +99,9 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
             quantidade: quantityRef.current.value,
             parcelas_restantes: parcelasRestantes.current.value,
             NumeroDeParcelas: NumeroDeParcelasRef.current.value,
-            ValorParcela: ValorParcelaRef.current.value
-            // adicione os novos campos aqui se necessário (ex: parcelas_restantes)
         };
 
-        if (!payload.name || !payload.cpf || !payload.quantidade || !payload.NumeroDeParcelas || !payload.ValorParcela) {
+        if (!payload.name || !payload.cpf || !payload.quantidade || !payload.NumeroDeParcelas || payload.parcelas_restantes === "") {
             toast.warn("Preencha todos os campos antes de enviar");
             return;
         }
@@ -159,10 +154,6 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
             <InputArea>
                 <Label>Número de Parcelas:</Label>
                 <Input name="NumeroDeParcelas" type="number" ref={NumeroDeParcelasRef} />
-            </InputArea>
-            <InputArea>
-                <Label>Valor da Parcela:</Label>
-                <Input name="ValorParcela" type="number" step="0.01" ref={ValorParcelaRef} />
             </InputArea>
             <Button type="submit">{onEdit ? "Salvar" : "Enviar"}</Button>
             {onEdit && (

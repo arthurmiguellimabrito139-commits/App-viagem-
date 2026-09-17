@@ -32,9 +32,7 @@ export const addPassageiro = async (req, res) => {
     const nome = body.nome || body.name || body.NOME;
     const cpf = body.cpf || body.CPF;
     const valor = body.valor_pago || body.Valor || body.Valor_pago || body.quantidade;
-    const parcelas = body.parcelas_restantes || body.parcelasRestantes || 0;
     const NumeroDeParcelas = body.NumeroDeParcelas || 0;
-    const ValorParcela = body.ValorParcela || 0;
     const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
     try {
         const novoPassageiro = new Passageiro(
@@ -42,8 +40,7 @@ export const addPassageiro = async (req, res) => {
             cpf,
             parseFloat(valor),
             parseInt(parcelasRestantes),
-            parseInt(NumeroDeParcelas),
-            parseFloat(ValorParcela)
+            parseInt(NumeroDeParcelas)
         );
 
         const ultimosDigitos = novoPassageiro.cpf.slice(-4);
@@ -85,13 +82,12 @@ export const updatePassageiro = (req, res) => {
     const nome = body.nome || body.name || body.NOME;
     const cpf = body.cpf || body.CPF;
     const valor = body.valor_pago || body.Valor || body.Valor_pago || body.quantidade;
-    const parcelas = body.parcelas_restantes || body.parcelasRestantes;
     const NumeroDeParcelas = body.NumeroDeParcelas || 0;
-    const ValorParcela = body.ValorParcela || 0;
+    const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
 
     try {
         // Usamos a classe novamente para garantir que os dados atualizados também são válidos
-        const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelas), parseInt(NumeroDeParcelas), parseFloat(ValorParcela));
+        const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelasRestantes), parseInt(NumeroDeParcelas));
 
        const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_pago` = ?, `parcelas_restantes` = ?, `NumeroParcelas` = ?, `ValorParcela` = ? WHERE `CPF` = ?';
 
