@@ -114,6 +114,7 @@ const Grid = ({ passageiros, setPassageiros, setOnEdit, usuarioAtual }) => {
                 <TableRow>
                     <TableHeader>Nome</TableHeader>
                     <TableHeader>CPF</TableHeader>
+                        <TableHeader>Valor Total</TableHeader>
                     <TableHeader>Valor Pago</TableHeader>
                     <TableHeader>Parcelas Restantes</TableHeader>
                     <TableHeader>Número de Parcelas</TableHeader>
@@ -131,6 +132,7 @@ const Grid = ({ passageiros, setPassageiros, setOnEdit, usuarioAtual }) => {
                     <TableRow key={i}>
                                 <TableData data-label="Nome">{item.NOME}</TableData>
                                 <TableData data-label="CPF">{item.CPF}</TableData>
+                                <TableData data-label="Valor total">{item.Valor_total}</TableData>
                                 <TableData data-label="Valor pago">{item.Valor_pago}</TableData>
                                 <TableData data-label="Parcelas restantes">{item.parcelas_restantes}</TableData>
                                 <TableData data-label="Número de parcelas">{item.NumeroParcelas}</TableData>

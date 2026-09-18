@@ -69,6 +69,7 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
 
     const nameRef = useRef();
     const cpfRef = useRef();
+    const totalRef = useRef();
     const quantityRef = useRef();
     const NumeroDeParcelasRef = useRef();
     const parcelasRestantes = useRef();
@@ -76,6 +77,7 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
         if (onEdit) {
             nameRef.current.value = onEdit.NOME;
             cpfRef.current.value = onEdit.CPF;
+            totalRef.current.value = onEdit.Valor_total;
             quantityRef.current.value = onEdit.Valor_pago;
             NumeroDeParcelasRef.current.value = onEdit.NumeroDeParcelas;
             parcelasRestantes.current.value = onEdit.parcelas_restantes;
@@ -85,6 +87,7 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
     const clearForm = () => {
         nameRef.current.value = "";
         cpfRef.current.value = "";
+        totalRef.current.value = "";
         quantityRef.current.value = "";
         NumeroDeParcelasRef.current.value = "";
         parcelasRestantes.current.value = "";
@@ -96,12 +99,13 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
         const payload = {
             name: nameRef.current.value,
             cpf: cpfRef.current.value,
-            quantidade: quantityRef.current.value,
+            valor_total: totalRef.current.value,
+            valor_pago: quantityRef.current.value || 0,
             parcelas_restantes: parcelasRestantes.current.value,
             NumeroDeParcelas: NumeroDeParcelasRef.current.value,
         };
 
-        if (!payload.name || !payload.cpf || !payload.quantidade || !payload.NumeroDeParcelas || payload.parcelas_restantes === "") {
+        if (!payload.name || !payload.cpf || !payload.valor_total || !payload.NumeroDeParcelas || payload.parcelas_restantes === "") {
             toast.warn("Preencha todos os campos antes de enviar");
             return;
         }
@@ -141,6 +145,10 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
             <InputArea>
                 <Label>CPF:</Label>
                 <Input name="cpf" type="text" ref={cpfRef} />
+            </InputArea>
+            <InputArea>
+                <Label>Valor Total:</Label>
+                <Input name="valor_total" type="number" step="0.01" ref={totalRef} />
             </InputArea>
             <InputArea>
                 <Label>Valor Pago:</Label>

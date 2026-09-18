@@ -31,14 +31,16 @@ export const addPassageiro = async (req, res) => {
     // Recebe os dados da requisição
     const nome = body.nome || body.name || body.NOME;
     const cpf = body.cpf || body.CPF;
-    const valor = body.valor_pago || body.Valor || body.Valor_pago || body.quantidade;
+    const valorTotal = body.valor_total ?? body.Valor_total ?? body.valorTotal;
+    const valorPago = body.valor_pago ?? body.Valor_pago ?? 0;
     const NumeroDeParcelas = body.NumeroDeParcelas || 0;
     const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
     try {
         const novoPassageiro = new Passageiro(
             nome,
             cpf,
-            parseFloat(valor),
+            parseFloat(valorTotal),
+            parseFloat(valorPago),
             parseInt(parcelasRestantes),
             parseInt(NumeroDeParcelas)
         );
@@ -46,10 +48,11 @@ export const addPassageiro = async (req, res) => {
         const ultimosDigitos = novoPassageiro.cpf.slice(-4);
         const senhaHash = await bcrypt.hash(ultimosDigitos, 10);
 
-        const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_pago`, `parcelas_restantes`, `NumeroParcelas`, `ValorParcela`, `senha`, `precisa_trocar_senha`) VALUES (?)';
+        const q = 'INSERT INTO passageiros (`NOME`, `CPF`, `Valor_total`, `Valor_pago`, `parcelas_restantes`, `NumeroParcelas`, `ValorParcela`, `senha`, `precisa_trocar_senha`) VALUES (?)';
         const values = [
             novoPassageiro.nome,
             novoPassageiro.cpf,
+            novoPassageiro.valorTotal,
             novoPassageiro.valorPago,
             novoPassageiro.parcelasRestantes,
             novoPassageiro.NumeroDeParcelas,
@@ -81,24 +84,26 @@ export const updatePassageiro = (req, res) => {
 
     const nome = body.nome || body.name || body.NOME;
     const cpf = body.cpf || body.CPF;
-    const valor = body.valor_pago || body.Valor || body.Valor_pago || body.quantidade;
+    const valorTotal = body.valor_total ?? body.Valor_total ?? body.valorTotal;
+    const valorPago = body.valor_pago ?? body.Valor_pago ?? 0;
     const NumeroDeParcelas = body.NumeroDeParcelas || 0;
     const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
 
     try {
         // Usamos a classe novamente para garantir que os dados atualizados também são válidos
-        const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valor), parseInt(parcelasRestantes), parseInt(NumeroDeParcelas));
+        const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valorTotal), parseFloat(valorPago), parseInt(parcelasRestantes), parseInt(NumeroDeParcelas));
 
-       const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_pago` = ?, `parcelas_restantes` = ?, `NumeroParcelas` = ?, `ValorParcela` = ? WHERE `CPF` = ?';
+        const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_total` = ?, `Valor_pago` = ?, `parcelas_restantes` = ?, `NumeroParcelas` = ?, `ValorParcela` = ? WHERE `CPF` = ?';
 
         const values = [
             passageiroAtualizado.nome,
             passageiroAtualizado.cpf,
+            passageiroAtualizado.valorTotal,
             passageiroAtualizado.valorPago,
             passageiroAtualizado.parcelasRestantes,
             passageiroAtualizado.NumeroDeParcelas,
             passageiroAtualizado.ValorParcela,
-            id, // CPF original (o :id da rota), pra saber qual linha atualizar
+                id // CPF original (o :id da rota), pra saber qual linha atualizar
         ];
 
         // Note que aqui passamos 'values' direto (sem ser um array dentro de outro array), 

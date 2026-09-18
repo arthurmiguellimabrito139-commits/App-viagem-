@@ -3,23 +3,26 @@ import { PerfilUsuario } from './PerfilUsuario.js';
 
 export class Passageiro extends Usuario {
     #valorPago;
+    #valorTotal;
     #parcelasRestantes;
     #NumeroDeParcelas;
 
-    constructor(nome, cpf, valorPago, parcelasRestantes, NumeroDeParcelas = 0) {
+    constructor(nome, cpf, valorTotal, valorPago, parcelasRestantes, NumeroDeParcelas = 0) {
         super(nome, cpf, PerfilUsuario.PASSAGEIRO);
 
+        this.#valorTotal = valorTotal;
         this.#valorPago = valorPago;
         this.#parcelasRestantes = parcelasRestantes;
         this.#NumeroDeParcelas = NumeroDeParcelas;
     }
 
+    get valorTotal() { return this.#valorTotal; }
     get valorPago() { return this.#valorPago; }
     get parcelasRestantes() { return this.#parcelasRestantes; }
     get NumeroDeParcelas() { return this.#NumeroDeParcelas; }
     get ValorParcela() {
-        const parcelasPagas = Math.max(this.#NumeroDeParcelas - this.#parcelasRestantes, 0);
-        return parcelasPagas > 0 ? this.#valorPago / parcelasPagas : 0;
+        const valorRestante = Math.max(this.#valorTotal - this.#valorPago, 0);
+        return this.#parcelasRestantes > 0 ? valorRestante / this.#parcelasRestantes : 0;
     }
    
     realizarPagamento(valor) {
