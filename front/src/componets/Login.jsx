@@ -46,7 +46,24 @@ const Input = styled.input`
   padding: 10px;
   border: 1px solid #bbb;
   border-radius: 5px;
-  width: 100%; /* Garante que o input não vaze o limite */
+    width: 100%;
+`;
+
+const PasswordWrapper = styled.div`
+    position: relative;
+    width: 100%;
+`;
+
+const TogglePassword = styled.button`
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: #007BFF;
+    cursor: pointer;
+    font-weight: bold;
 `;
 
 const Button = styled.button`
@@ -77,6 +94,7 @@ const Login = ({ onLogin }) => {
     const [perfil, setPerfil] = useState('passageiro');
     const [cpf, setCpf] = useState('');
     const [senha, setSenha] = useState('');
+    const [mostrarSenha, setMostrarSenha] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -137,13 +155,22 @@ const Login = ({ onLogin }) => {
 
                 <InputGroup>
                     <label>{perfil === 'admin' ? 'Senha:' : 'Senha:'}</label>
-                        <Input 
-                            placeholder="Digite sua senha"
-                        type="password" 
-                        required 
-                        value={senha} 
-                        onChange={(e) => setSenha(e.target.value)} 
-                    />
+                        <PasswordWrapper>
+                            <Input 
+                                placeholder="Digite sua senha"
+                                type={mostrarSenha ? 'text' : 'password'}
+                                required 
+                                value={senha} 
+                                onChange={(e) => setSenha(e.target.value)} 
+                            />
+                            <TogglePassword
+                                type="button"
+                                onClick={() => setMostrarSenha(!mostrarSenha)}
+                                aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                            >
+                                {mostrarSenha ? 'Ocultar' : 'Mostrar'}
+                            </TogglePassword>
+                        </PasswordWrapper>
                         {perfil === 'passageiro' && (
                             <InputHint>
                                 No primeiro login, use os 4 ultimos digitos do seu CPF.
