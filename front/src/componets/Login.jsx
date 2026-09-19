@@ -37,6 +37,11 @@ const InputGroup = styled.div`
   gap: 5px;
 `;
 
+const InputHint = styled.small`
+    color: #666;
+    line-height: 1.35;
+`;
+
 const Input = styled.input`
   padding: 10px;
   border: 1px solid #bbb;
@@ -132,13 +137,18 @@ const Login = ({ onLogin }) => {
 
                 <InputGroup>
                     <label>{perfil === 'admin' ? 'Senha:' : 'Senha:'}</label>
-                    <Input 
-                        placeholder={perfil === 'admin' ? "Digite sua senha" : "primerio login use os últimos 4 dígitos do seu CPF"}
+                        <Input 
+                            placeholder="Digite sua senha"
                         type="password" 
                         required 
                         value={senha} 
                         onChange={(e) => setSenha(e.target.value)} 
                     />
+                        {perfil === 'passageiro' && (
+                            <InputHint>
+                                No primeiro login, use os 4 ultimos digitos do seu CPF.
+                            </InputHint>
+                        )}
                 </InputGroup>
             
 
