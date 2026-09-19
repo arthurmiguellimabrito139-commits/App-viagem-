@@ -167,8 +167,9 @@ const Login = ({ onLogin }) => {
                                 type="button"
                                 onClick={() => setMostrarSenha(!mostrarSenha)}
                                 aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                                title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
                             >
-                                {mostrarSenha ? 'Ocultar' : 'Mostrar'}
+                                {mostrarSenha ? '🙈' : '👁'}
                             </TogglePassword>
                         </PasswordWrapper>
                         {perfil === 'passageiro' && (

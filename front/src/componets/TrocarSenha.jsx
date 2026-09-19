@@ -46,6 +46,22 @@ const Input = styled.input`
   width: 100%;
 `;
 
+const PasswordWrapper = styled.div`
+    position: relative;
+    width: 100%;
+`;
+
+const TogglePassword = styled.button`
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+`;
+
 const Button = styled.button`
   padding: 10px 20px;
   background-color: #007BFF;
@@ -61,6 +77,8 @@ const Button = styled.button`
 const TrocarSenha = ({ usuarioAtual, onSenhaTrocada }) => {
     const [novaSenha, setNovaSenha] = useState('');
     const [confirmarSenha, setConfirmarSenha] = useState('');
+    const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
+    const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false);
 
     const handleTrocarSenha = async (e) => {
         e.preventDefault();
@@ -106,25 +124,44 @@ const TrocarSenha = ({ usuarioAtual, onSenhaTrocada }) => {
 
             <InputGroup>
                 <label>Nova senha:</label>
-                <Input
-                    type="password"
-                    required
-                    minLength={6}
-                    value={novaSenha}
-                    onChange={(e) => setNovaSenha(e.target.value)}
-                />
+                <PasswordWrapper>
+                    <Input
+                        type={mostrarNovaSenha ? 'text' : 'password'}
+                        required
+                        minLength={6}
+                        value={novaSenha}
+                        onChange={(e) => setNovaSenha(e.target.value)}
+                    />
+                    <TogglePassword
+                        type="button"
+                        onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
+                        aria-label={mostrarNovaSenha ? 'Ocultar nova senha' : 'Mostrar nova senha'}
+                        title={mostrarNovaSenha ? 'Ocultar nova senha' : 'Mostrar nova senha'}
+                    >
+                        {mostrarNovaSenha ? '🙈' : '👁'}
+                    </TogglePassword>
+                </PasswordWrapper>
             </InputGroup>
 
             <InputGroup>
                 <label>Confirmar nova senha:</label>
-                <Input
-                
-                    type="password"
-                    required
-                    minLength={6}
-                    value={confirmarSenha}
-                    onChange={(e) => setConfirmarSenha(e.target.value)}
-                />
+                <PasswordWrapper>
+                    <Input
+                        type={mostrarConfirmacao ? 'text' : 'password'}
+                        required
+                        minLength={6}
+                        value={confirmarSenha}
+                        onChange={(e) => setConfirmarSenha(e.target.value)}
+                    />
+                    <TogglePassword
+                        type="button"
+                        onClick={() => setMostrarConfirmacao(!mostrarConfirmacao)}
+                        aria-label={mostrarConfirmacao ? 'Ocultar confirmacao' : 'Mostrar confirmacao'}
+                        title={mostrarConfirmacao ? 'Ocultar confirmacao' : 'Mostrar confirmacao'}
+                    >
+                        {mostrarConfirmacao ? '🙈' : '👁'}
+                    </TogglePassword>
+                </PasswordWrapper>
             </InputGroup>
 
             <Button type="submit">Salvar nova senha</Button>
