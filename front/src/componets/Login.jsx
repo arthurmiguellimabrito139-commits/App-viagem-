@@ -133,7 +133,7 @@ const Login = ({ onLogin }) => {
                 <InputGroup>
                     <label>{perfil === 'admin' ? 'Senha:' : 'Senha:'}</label>
                     <Input 
-                        placeholder={perfil === 'admin' ? "Digite sua senha" : "Ex: 8900"}
+                        placeholder={perfil === 'admin' ? "Digite sua senha" : "primerio login use os últimos 4 dígitos do seu CPF"}
                         type="password" 
                         required 
                         value={senha} 
