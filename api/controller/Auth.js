@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { limparCPF } from '../utils/cpf.js';
 
 const gerarToken = (payload) => {
-    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '8h' });
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
 export const fazerLogin = async (req, res) => {

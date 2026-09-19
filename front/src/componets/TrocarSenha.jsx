@@ -70,8 +70,10 @@ const TrocarSenha = ({ usuarioAtual, onSenhaTrocada }) => {
             return;
         }
 
-        if (novaSenha.length < 4) {
-            toast.error('A senha precisa ter pelo menos 4 caracteres.');
+        const senhaForte = /^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>_-]).{6,}$/;
+
+        if (!senhaForte.test(novaSenha)) {
+            toast.error('A senha precisa ter pelo menos 6 caracteres, 1 letra, 1 número e 1 caractere especial.');
             return;
         }
 
@@ -98,7 +100,8 @@ const TrocarSenha = ({ usuarioAtual, onSenhaTrocada }) => {
             <Titulo>Crie sua nova senha</Titulo>
             <Aviso>
                 Por segurança, você precisa trocar a senha temporária (últimos 4 dígitos
-                do seu CPF) antes de continuar.
+                do seu CPF) antes de continuar. A nova senha deve ter pelo menos 6 caracteres,
+                1 letra, 1 número e 1 caractere especial.
             </Aviso>
 
             <InputGroup>
@@ -106,7 +109,7 @@ const TrocarSenha = ({ usuarioAtual, onSenhaTrocada }) => {
                 <Input
                     type="password"
                     required
-                    minLength={4}
+                    minLength={6}
                     value={novaSenha}
                     onChange={(e) => setNovaSenha(e.target.value)}
                 />
@@ -118,7 +121,7 @@ const TrocarSenha = ({ usuarioAtual, onSenhaTrocada }) => {
                 
                     type="password"
                     required
-                    minLength={4}
+                    minLength={6}
                     value={confirmarSenha}
                     onChange={(e) => setConfirmarSenha(e.target.value)}
                 />

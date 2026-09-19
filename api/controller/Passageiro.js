@@ -149,12 +149,12 @@ export const trocarSenhaPassageiro = async (req, res) => {
         return res.status(400).json({ erro: 'Informe a nova senha.' });
     }
 
-    // Pelo menos 6 caracteres, com pelo menos 1 número e 1 caractere especial
-    const senhaForte = /^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>_\-]).{6,}$/;
+    // Pelo menos 6 caracteres, com pelo menos 1 letra, 1 número e 1 caractere especial
+    const senhaForte = /^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>_\-]).{6,}$/;
 
     if (!senhaForte.test(novaSenha)) {
         return res.status(400).json({
-            erro: 'A senha precisa ter pelo menos 6 caracteres, incluindo 1 número e 1 caractere especial (ex: !@#$%).'
+            erro: 'A senha precisa ter pelo menos 6 caracteres, incluindo 1 letra, 1 número e 1 caractere especial (ex: !@#$%).'
         });
     }
 
