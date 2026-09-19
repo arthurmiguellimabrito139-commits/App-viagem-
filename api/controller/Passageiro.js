@@ -1,7 +1,7 @@
 import { db } from '../db.js';
 import bcrypt from 'bcrypt';
 import { Passageiro } from '../models/Passageiro.js'; // Importando nossa classe com as regras
-
+import { limparCPF, cpfValido } from '../utils/limparCPF.js';
 
 // Leitura: Qualquer usuário logado pode acessar
 export const getPassageiro = (req, res) => {
@@ -35,15 +35,16 @@ export const addPassageiro = async (req, res) => {
     const valorPago = body.valor_pago ?? body.Valor_pago ?? 0;
     const NumeroDeParcelas = body.NumeroDeParcelas || 0;
     const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
+
+    const cpfLimpo = limparCPF(cpf);
+
+    if (!cpfValido(cpfLimpo)) {
+        return res.status(400).json({ erro: 'CPF inválido. Digite os 11 números do CPF (com ou sem pontos/traço).' });
+    }
+
     try {
-        const novoPassageiro = new Passageiro(
-            nome,
-            cpf,
-            parseFloat(valorTotal),
-            parseFloat(valorPago),
-            parseInt(parcelasRestantes),
-            parseInt(NumeroDeParcelas)
-        );
+
+        const novoPassageiro = new Passageiro(nome, cpfLimpo, parseFloat(valor), parseInt(parcelas), parseInt(NumeroDeParcelas), parseFloat(ValorParcela));
 
         const ultimosDigitos = novoPassageiro.cpf.slice(-4);
         const senhaHash = await bcrypt.hash(ultimosDigitos, 10);
@@ -89,9 +90,15 @@ export const updatePassageiro = (req, res) => {
     const NumeroDeParcelas = body.NumeroDeParcelas || 0;
     const parcelasRestantes = body.parcelas_restantes || body.parcelasRestantes || 0;
 
+    const cpfLimpo = limparCPF(cpf);
+
+    if (!cpfValido(cpfLimpo)) {
+        return res.status(400).json({ erro: 'CPF inválido. Digite os 11 números do CPF (com ou sem pontos/traço).' });
+    }
+
     try {
         // Usamos a classe novamente para garantir que os dados atualizados também são válidos
-        const passageiroAtualizado = new Passageiro(nome, cpf, parseFloat(valorTotal), parseFloat(valorPago), parseInt(parcelasRestantes), parseInt(NumeroDeParcelas));
+       const passageiroAtualizado = new Passageiro(nome, cpfLimpo, parseFloat(valor), parseInt(parcelas), parseInt(NumeroDeParcelas), parseFloat(ValorParcela));
 
         const q = 'UPDATE passageiros SET `NOME` = ?, `CPF` = ?, `Valor_total` = ?, `Valor_pago` = ?, `parcelas_restantes` = ?, `NumeroParcelas` = ?, `ValorParcela` = ? WHERE `CPF` = ?';
 
@@ -103,7 +110,7 @@ export const updatePassageiro = (req, res) => {
             passageiroAtualizado.parcelasRestantes,
             passageiroAtualizado.NumeroDeParcelas,
             passageiroAtualizado.ValorParcela,
-                id // CPF original (o :id da rota), pra saber qual linha atualizar
+            id // CPF original (o :id da rota), pra saber qual linha atualizar
         ];
 
         // Note que aqui passamos 'values' direto (sem ser um array dentro de outro array), 
@@ -142,19 +149,27 @@ export const trocarSenhaPassageiro = async (req, res) => {
         return res.status(400).json({ erro: 'Informe a nova senha.' });
     }
 
-    if (novaSenha.length < 4) {
-        return res.status(400).json({ erro: 'A senha precisa ter pelo menos 4 caracteres.' });
+    // Pelo menos 6 caracteres, com pelo menos 1 número e 1 caractere especial
+    const senhaForte = /^(?=.*[0-9])(?=.*[!@#$%^&*(),.?":{}|<>_\-]).{6,}$/;
+
+    if (!senhaForte.test(novaSenha)) {
+        return res.status(400).json({
+            erro: 'A senha precisa ter pelo menos 6 caracteres, incluindo 1 número e 1 caractere especial (ex: !@#$%).'
+        });
     }
 
     try {
         const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+
         const q = 'UPDATE passageiros SET `senha` = ?, `precisa_trocar_senha` = false WHERE `CPF` = ?';
 
         db.query(q, [novaSenhaHash, cpf], (err, result) => {
             if (err) return res.status(500).json(err);
+
             if (result.affectedRows === 0) {
                 return res.status(404).json({ erro: 'Passageiro não encontrado.' });
             }
+
             return res.status(200).json({ mensagem: 'Senha atualizada com sucesso.' });
         });
     } catch (error) {

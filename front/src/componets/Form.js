@@ -93,7 +93,7 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
         parcelasRestantes.current.value = "";
     };
 
-   const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         const payload = {
@@ -112,7 +112,7 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
 
         try {
             // Adicionando o cabeçalho de segurança com o perfil do admin
-           const config = { headers: { 'Authorization': `Bearer ${usuarioAtual.token}` } };
+            const config = { headers: { 'Authorization': `Bearer ${usuarioAtual.token}` } };
 
             if (onEdit) {
                 await api.put(`/passageiros/${onEdit.CPF}`, payload, config);
@@ -144,7 +144,10 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
             </InputArea>
             <InputArea>
                 <Label>CPF:</Label>
-                <Input name="cpf" type="text" ref={cpfRef} />
+                <Input name="cpf" type="text" ref={cpfRef} placeholder="000.000.000-00" />
+                <small style={{ color: '#777', fontSize: '0.8rem' }}>
+                    Digite os 11 números do CPF (com ou sem pontos e traço — o sistema aceita os dois formatos).
+                </small>
             </InputArea>
             <InputArea>
                 <Label>Valor Total:</Label>
@@ -156,9 +159,9 @@ const Form = ({ onEdit, setOnEdit, getPassageiros, usuarioAtual }) => {
             </InputArea>
             <InputArea>
                 <Label>Parcelas Restantes:</Label>
-                <Input name="parcelas_restantes" type="number" ref={parcelasRestantes} /> 
+                <Input name="parcelas_restantes" type="number" ref={parcelasRestantes} />
             </InputArea>
-        
+
             <InputArea>
                 <Label>Número de Parcelas:</Label>
                 <Input name="NumeroDeParcelas" type="number" ref={NumeroDeParcelasRef} />
